@@ -1,5 +1,5 @@
 const clientId = '77593f9a9dc64ce788d4a59600c1e57a';
-const redirectUri = 'http://localhost:3000/';
+const redirectUri = 'http://jammming-it-up.surge.sh/';
 let accessToken;
 
 const Spotify = {
@@ -64,9 +64,9 @@ const Spotify = {
         method: 'POST',
         body: JSON.stringify({name: name})
       }).then(response => response.json()
-      ).then(jsonResponse => {
-        const playlistId = jsonResponse.id;
-        return fetch(`https://api.spotify.com/v1/users/${userId}/playlists/${playlistId}/tracks`, {
+      ).then(_jsonResponse => {
+        const playlistId = _jsonResponse.id;
+        return fetch(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`, {
           headers: headers,
           method: 'POST',
           body: JSON.stringify({uris: trackUris})
