@@ -54,7 +54,7 @@ class App extends Component {
   }
 
   startPlaying(trackuri) {
-    const { audio } = this.state;
+    // const { audio } = this.state;
     const trackid = trackuri.split(':')[2];
 
     Spotify.getTrack(trackid).then((trackdata) => {

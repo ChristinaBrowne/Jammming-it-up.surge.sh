@@ -50,7 +50,7 @@ class Track extends React.Component {
   }
 
   render() {
-    const { track, isPlaying, playingId } = this.props;
+    const { track, /* isPlaying, */ playingId } = this.props;
     const audioType = this.props.audioType ? "audio/ogg" : "audio/mpeg";
     console.log(`Title: ${track.name}`);    
     console.log(`playingId: ${playingId}`);
