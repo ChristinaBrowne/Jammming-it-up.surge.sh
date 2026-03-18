@@ -1,5 +1,5 @@
 const clientId = '77593f9a9dc64ce788d4a59600c1e57a';
-const redirectUri = 'https://jammming-it-up.vercel.app/' /* 'http://jammming-it-up.surge.sh/'; */
+const redirectUri = 'https://jammming-it-kubx9vi0i-christinabrownes-projects.vercel.app/' /* 'http://jammming-it-up.surge.sh/'; */
 let accessToken;
 
 const Spotify = {
