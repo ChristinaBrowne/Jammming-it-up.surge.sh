@@ -14,6 +14,7 @@ class App extends Component {
       audio: new Audio(),
       trackdata: null,
       searchResults: [],
+      errorMessage: '',
       playlistName: 'New Playlist',
       playlistTracks: [],
       playing: false,
@@ -83,9 +84,17 @@ class App extends Component {
   }
 
   search(term) {
-    Spotify.search(term).then(searchResults => {
-      this.setState({ searchResults });
-    });
+    Spotify.search(term)
+      .then(searchResults => {
+        this.setState({ searchResults, errorMessage: '' });
+      })
+      .catch((error) => {
+        console.error(error);
+        this.setState({
+          searchResults: [],
+          errorMessage: error.message || 'Spotify search failed.'
+        });
+      });
   }
 
   addTrack(track) {
@@ -121,6 +130,7 @@ class App extends Component {
         <h1>Ja<span className="highlight">mmm</span>ing</h1>
         <div className="App">
           <SearchBar onSearch={this.search} />
+          {this.state.errorMessage ? <p>{this.state.errorMessage}</p> : null}
           <div className="App-playlist">
             <SearchResults
               searchResults={this.state.searchResults}

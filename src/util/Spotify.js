@@ -11,6 +11,32 @@ const EXPIRY_KEY = 'spotify_token_expiry';
 const VERIFIER_KEY = 'spotify_code_verifier';
 let accessToken;
 
+const parseResponseBody = async (response) => {
+  const contentType = response.headers.get('content-type') || '';
+
+  if (contentType.includes('application/json')) return response.json();
+
+  const text = await response.text();
+
+  try {
+    return JSON.parse(text);
+  } catch (error) {
+    return text;
+  }
+};
+
+const getErrorMessage = (body, fallback) => {
+  if (!body) return fallback;
+  if (typeof body === 'string') return body;
+
+  if (body.error && typeof body.error === 'string') return body.error;
+  if (body.error && body.error.message) return body.error.message;
+
+  if (body.message) return body.message;
+
+  return fallback;
+};
+
 const generateRandomString = (length) => {
   const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   const values = window.crypto.getRandomValues(new Uint8Array(length));
@@ -103,10 +129,11 @@ const exchangeCodeForToken = async (code) => {
   });
 
   if (!response.ok) {
-    throw new Error(`Spotify token exchange failed with status ${response.status}.`);
+    const errorBody = await parseResponseBody(response);
+    throw new Error(getErrorMessage(errorBody, `Spotify token exchange failed with status ${response.status}.`));
   }
 
-  const data = await response.json();
+  const data = await parseResponseBody(response);
   window.localStorage.removeItem(VERIFIER_KEY);
   storeToken(data.access_token, data.expires_in);
 
@@ -158,6 +185,11 @@ const authorizedFetch = async (url, options = {}) => {
     throw new Error('Spotify authorization expired. Please try again.');
   }
 
+  if (!response.ok) {
+    const errorBody = await parseResponseBody(response);
+    throw new Error(getErrorMessage(errorBody, `Spotify request failed with status ${response.status}.`));
+  }
+
   return response;
 };
 
@@ -166,12 +198,12 @@ const Spotify = {
 
   getTrack(id) {
     return authorizedFetch(`https://api.spotify.com/v1/tracks/${id}`)
-      .then((response) => response.json());
+      .then((response) => parseResponseBody(response));
   },
 
   search(term) {
     return authorizedFetch(`https://api.spotify.com/v1/search?type=track&q=${encodeURIComponent(term)}`)
-      .then((response) => response.json())
+      .then((response) => parseResponseBody(response))
       .then((jsonResponse) => {
         if (!jsonResponse.tracks) {
           return [];
@@ -196,7 +228,7 @@ const Spotify = {
     let userId;
 
     return authorizedFetch('https://api.spotify.com/v1/me')
-      .then((response) => response.json())
+      .then((response) => parseResponseBody(response))
       .then((jsonResponse) => {
         userId = jsonResponse.id;
 
@@ -208,7 +240,7 @@ const Spotify = {
           body: JSON.stringify({ name })
         });
       })
-      .then((response) => response.json())
+      .then((response) => parseResponseBody(response))
       .then((jsonResponse) => {
         const playlistId = jsonResponse.id;
 
