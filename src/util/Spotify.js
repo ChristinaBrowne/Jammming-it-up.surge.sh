@@ -1,9 +1,5 @@
 const clientId = process.env.REACT_APP_SPOTIFY_CLIENT_ID;
-const redirectUri =
-  process.env.REACT_APP_SPOTIFY_REDIRECT_URI ||
-  (process.env.NODE_ENV === 'development'
-    ? 'http://localhost:3000/'
-    : 'https://jammming-it-up.vercel.app/callback');
+const redirectUri = process.env.REACT_APP_SPOTIFY_REDIRECT_URI || (process.env.NODE_ENV === 'development' ? 'http://localhost:3000/' : 'https://jammming-it-up.vercel.app/callback');
 const scopes = ['playlist-modify-public'];
 
 const TOKEN_KEY = 'spotify_access_token';
@@ -89,13 +85,12 @@ const clearToken = () => {
 };
 
 const getStoredToken = () => {
-  if (accessToken) {
-    return accessToken;
-  }
+  if (accessToken) return accessToken;
 
   const storedToken = window.localStorage.getItem(TOKEN_KEY);
   const expiry = Number(window.localStorage.getItem(EXPIRY_KEY));
 
+  // Check if token exists and is not expired
   if (storedToken && expiry && Date.now() < expiry) {
     accessToken = storedToken;
     return storedToken;
@@ -108,9 +103,7 @@ const getStoredToken = () => {
 const exchangeCodeForToken = async (code) => {
   const codeVerifier = window.localStorage.getItem(VERIFIER_KEY);
 
-  if (!codeVerifier) {
-    throw new Error('Missing PKCE code verifier.');
-  }
+  if (!codeVerifier) throw new Error('Missing PKCE code verifier.');
 
   const body = new URLSearchParams({
     client_id: clientId,
@@ -147,16 +140,12 @@ const exchangeCodeForToken = async (code) => {
 
 const getAccessToken = async () => {
   const storedToken = getStoredToken();
-  if (storedToken) {
-    return storedToken;
-  }
+  if (storedToken) return storedToken;
 
   const url = new URL(window.location.href);
   const code = url.searchParams.get('code');
 
-  if (code) {
-    return exchangeCodeForToken(code);
-  }
+  if (code) return exchangeCodeForToken(code);
 
   const authUrl = await buildAuthUrl();
   window.location.assign(authUrl);
